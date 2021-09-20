@@ -10,7 +10,7 @@ import Modal from 'components/Modal/Modal';
 import { ConteinerApp, TitleApp } from './App.styled';
 import 'react-toastify/dist/ReactToastify.css';
 
-const App = () => {
+export default function App() {
   const [query, setQuery] = useState('');
   const [total, setTotal] = useState(1);
   const [images, setImages] = useState([]);
@@ -26,40 +26,31 @@ const App = () => {
   }, [reqStatus]);
 
   useEffect(() => {
-    if (query === '') return;
-    scroll();
+    if (!query) return;
+
     async function getImages() {
       try {
         setReqStatus('pending');
-        setImages([]);
-        setPage(1);
-        setTotal(1);
-        const images = await fetchImages(query, page);
+        const imgData = await fetchImages(query, page);
         setReqStatus('resolved');
-        setImages(images.hits);
-        setTotal(images.totalHits);
+        setImages(prevImages => [...prevImages, ...imgData.hits]);
+        setTotal(imgData.totalHits);
+        scroll();
       } catch (error) {
         setReqStatus('rejected');
       }
     }
     getImages();
-    async function getImagesfromPage() {
-      try {
-        setReqStatus('pending');
-        const images = await fetchImages(query, page);
-        setReqStatus('resolved');
-        setImages(prevImages => [...prevImages, ...images.hits]);
-      } catch (error) {
-        setReqStatus('rejected');
-      }
-    }
-    if (page !== 1) {
-      getImagesfromPage();
-    }
   }, [query, page]);
 
-  const submitForm = query => {
-    setQuery(query);
+  const submitForm = dataQuery => {
+    setQuery(dataQuery);
+    setImages([]);
+    setPage(1);
+  };
+
+  const handleButtonMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
   const toggleModalShow = event => {
@@ -68,6 +59,7 @@ const App = () => {
     }
     setIsOpenModal(!isOpenModal);
   };
+
   return (
     <ConteinerApp>
       <Searchbar onSubmit={submitForm} />
@@ -84,14 +76,14 @@ const App = () => {
           {reqStatus === 'pending' ? (
             <LoaderMore />
           ) : (
-            <Button onClick={() => setPage(prevPage => prevPage + 1)} />
+            <Button onClick={handleButtonMore} />
           )}
         </>
       )}
       <ToastContainer autoClose={3000} />
     </ConteinerApp>
   );
-};
+}
 
 // class App extends Component {
 //   state = {
@@ -108,11 +100,11 @@ const App = () => {
 //     this.setState({ query: q });
 //   };
 
-//   handleButtonMore = () => {
-//     this.setState(prevState => ({
-//       page: prevState.page + 1,
-//     }));
-//   };
+// handleButtonMore = () => {
+//   this.setState(prevState => ({
+//     page: prevState.page + 1,
+//   }));
+// };
 
 //   async componentDidUpdate(_, prevState) {
 //     const { query, page } = this.state;
@@ -194,5 +186,3 @@ const App = () => {
 //     );
 //   }
 // }
-
-export default App;
