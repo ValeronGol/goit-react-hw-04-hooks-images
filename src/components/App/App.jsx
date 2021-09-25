@@ -12,7 +12,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
   const [query, setQuery] = useState('');
-  const [total, setTotal] = useState(1);
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
   const [reqStatus, setReqStatus] = useState('idle');
@@ -31,11 +30,14 @@ export default function App() {
     async function getImages() {
       try {
         setReqStatus('pending');
-        const imgData = await fetchImages(query, page);
-        setReqStatus('resolved');
-        setImages(prevImages => [...prevImages, ...imgData.hits]);
-        setTotal(imgData.totalHits);
-        scroll();
+        const imagesData = await fetchImages(query, page);
+        if (imagesData.length === 0) {
+          setReqStatus('rejected');
+        } else {
+          setReqStatus('resolved');
+          setImages(prevImages => [...prevImages, ...imagesData]);
+          scroll();
+        }
       } catch (error) {
         setReqStatus('rejected');
       }
@@ -63,23 +65,16 @@ export default function App() {
   return (
     <ConteinerApp>
       <Searchbar onSubmit={submitForm} />
-      {!total && (
+      {reqStatus === 'rejected' && (
         <TitleApp>
           По такому запросу картинок не найдено. Введите другой запрос!!!
         </TitleApp>
       )}
-      {!images && <LoaderMore />}
-      {images && images.length > 0 && (
-        <>
-          <ImageGallery images={images} onClick={toggleModalShow} />
-          {isOpenModal && <Modal showModal={toggleModalShow} props={photo} />}
-          {reqStatus === 'pending' ? (
-            <LoaderMore />
-          ) : (
-            <Button onClick={handleButtonMore} />
-          )}
-        </>
-      )}
+      {images && <ImageGallery images={images} onClick={toggleModalShow} />}
+      {isOpenModal && <Modal showModal={toggleModalShow} props={photo} />}
+      {reqStatus === 'pending' && <LoaderMore />}
+      {reqStatus === 'resolved' && <Button onClick={handleButtonMore} />}
+
       <ToastContainer autoClose={3000} />
     </ConteinerApp>
   );
