@@ -3,13 +3,13 @@ import { Overlay, ContainerModal } from './Modal.styled';
 
 export default function Modal(props) {
   useEffect(() => {
-    window.addEventListener('keydown', hendelKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', hendelKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   });
 
-  const hendelKeyDown = e => {
+  const handleKeyDown = e => {
     if (e.code === 'Escape') {
       props.showModal();
     }

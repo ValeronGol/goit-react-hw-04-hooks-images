@@ -16,7 +16,7 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [reqStatus, setReqStatus] = useState('idle');
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [photo, setpPhoto] = useState('');
+  const [photo, setPhoto] = useState('');
 
   useEffect(() => {
     if (reqStatus === 'rejected') {
@@ -57,7 +57,9 @@ export default function App() {
 
   const toggleModalShow = event => {
     if (!isOpenModal) {
-      setpPhoto(event.target.dataset.photo);
+      setPhoto(event.target.dataset.photo);
+    } else {
+      setPhoto('');
     }
     setIsOpenModal(!isOpenModal);
   };
